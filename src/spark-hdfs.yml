@@ -1,0 +1,7 @@
+---
+- hosts: frontendnodes
+  remote_user: hadoop
+  tasks:
+  - name: copying data into hdfs for spark execution
+    shell: /opt/hadoop/bin/hdfs dfs -put ml-10M100K/ratings.dat hdfs://futuresystems/ratings.dat
+

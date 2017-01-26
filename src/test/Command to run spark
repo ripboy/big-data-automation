@@ -1,0 +1,1 @@
+$spark-submit --master yarn --deploy-mode client --executor-memory 3g Movie-Similarities-1m.py 260 > spark_output.txt

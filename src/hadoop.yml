@@ -1,0 +1,22 @@
+- name: Manually setting the java path
+  hosts: all
+  remote_user: cc
+  become: yes
+  tasks:
+  - replace: dest=/opt/hadoop/etc/hadoop/hadoop-env.sh regexp='\$\{JAVA\_HOME\}' replace='/usr/lib/jvm/java-7-openjdk-amd64'
+  - shell: source /opt/hadoop/etc/hadoop/hadoop-env.sh
+    args:
+      executable: "/bin/bash"
+- name: Running a python program on front end node and fetching the results
+  hosts: frontendnodes
+  remote_user: hadoop
+  tasks:
+  - name: copying the python file to the front end node
+    copy: src=MovieSimilaritiesLarge.py dest=/home/hadoop/ owner=hadoop group=hadoop mode=0777
+  - name: running the python script for hadoop
+    shell: python MovieSimilaritiesLarge.py -r hadoop --items=ml-10M100K/movies.dat ml-10M100K/ratings.dat --no-conf --hadoop-bin /opt/hadoop/bin/hadoop > new_hadoop_output.txt       
+    args:
+      executable: "/bin/bash"
+  - name: retrieving the output file to local node
+    fetch: src=/home/hadoop/new_hadoop_output.txt dest=results
+

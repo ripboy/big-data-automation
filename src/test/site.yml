@@ -1,0 +1,31 @@
+---
+- include: play-hadoop.yml
+- include: play-alladdons.yml
+- name: Installing pip and mrjob
+  hosts: all
+  remote_user: cc
+  become: yes
+  tasks:
+  - name: Installing pip
+    easy_install: name=pip state=latest
+  - name: Installing mrjob
+    shell: pip install mrjob
+- name: Running a python program on front end node and fetching the results
+  hosts: frontendnodes
+  remote_user: hadoop
+  tasks:
+  - name: copying the python file to the front end node and running it
+    copy: src=MovieSimilarities.py dest=/home/hadoop/ owner=hadoop group=hadoop mode=0777
+  - name: Copying the python file for spark execution
+    copy: src=Movie-Similarities-1m.py dest=/home/hadoop/ owner=hadoop group=hadoop mode=0777
+  - name: Downloading the dataset file - u.data
+    get_url: url=http://files.grouplens.org/datasets/movielens/ml-100k/u.data dest=/home/hadoop/ mode=0777
+  - name: Downloading the dataset file - u.item 
+    get_url: url=http://files.grouplens.org/datasets/movielens/ml-100k/u.item dest=/home/hadoop mode=0777
+  - name: Downloading 1m file for spark  
+    get_url: url=http://files.grouplens.org/datasets/movielens/ml-1m.zip dest=/home/hadoop/ mode=0777
+  - name: Unzipping the ml-1m file
+    shell: unzip ml-1m.zip
+  - name: copying data into hdfs for spark execution
+    shell: hdfs dfs -put ml-1m/ratings.dat hdfs://futuresystems/ratings2.dat
+    
